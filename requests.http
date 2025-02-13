@@ -13,6 +13,7 @@
 
 # Debe decir "Hello World!" con Content-Type text/plain
 GET {{base}}/api HTTP/1.1
+Accept: application/json
 
 ###
 

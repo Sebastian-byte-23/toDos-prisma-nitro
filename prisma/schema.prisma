@@ -1,0 +1,29 @@
+// Definición de la base de datos SQLite
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"  // Archivo SQLite donde se almacenarán los datos
+}
+
+// Especificar el generador para Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modelo para el usuario (User)
+model User {
+  id       Int      @id @default(autoincrement())  // ID autoincremental para el usuario
+  username String   @unique                       // Nombre de usuario único
+  name     String                                 // Nombre del usuario
+  password String                                 // Contraseña encriptada
+  token    String?                                // Token opcional para la autenticación
+  todos    ToDo[]                                 // Relación con las tareas (ToDo)
+}
+
+// Modelo para las tareas (ToDo)
+model ToDo {
+  id        Int      @id @default(autoincrement())  // ID autoincremental para las tareas
+  title     String                                 // Título de la tarea
+  completed Boolean  @default(false)               // Estado de la tarea (completada o no)
+  userId    Int                                     // ID del usuario que creó la tarea
+  user      User     @relation(fields: [userId], references: [id])  // Relación con el modelo User
+}

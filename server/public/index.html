@@ -162,13 +162,18 @@
 
         async function addTodo() {
           try {
-            const todo = await post('/api/todos', { title: title.value });
-            title.value = '';
-            todos.value.push(todo);
+            // Asegúrate de incluir el userId en el objeto
+            const todoData = { title: title.value }; // Define todoData correctamente
+            console.log('Enviando datos de tarea:', todoData); // Imprimir los datos para depuración
+
+            const todo = await post('/api/todos', todoData); // Llama a la función post con todoData
+            title.value = ''; // Limpia el campo de título
+            todos.value.push(todo); // Agrega la nueva tarea a la lista
           } catch (error) {
-            errorMessage.value = error.message;
+            errorMessage.value = error.message; // Manejo de errores
           }
         }
+
 
 
         async function toggleCompleted(todo, event) {

@@ -1,9 +1,12 @@
 // /api/auth/logout.ts
-import { defineEventHandler, createError } from 'h3'
-import { users } from '../../utils/repositories/users';
+import { defineEventHandler, createError } from 'h3';
+import { PrismaClient } from '@prisma/client';
+
+// Inicializar Prisma Client
+const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
-  // Verificar que el método sea POST
+  // Verificar que sea un método POST
   if (event.req.method !== 'POST') {
     throw createError({
       statusCode: 405,
@@ -14,7 +17,8 @@ export default defineEventHandler(async (event) => {
   // Obtener el token de la cabecera
   const token = event.req.headers['x-authorization'];
 
-  if (!token) {
+  // Asegúrate de que el token sea un string
+  if (!token || Array.isArray(token)) {
     throw createError({
       statusCode: 401,
       statusMessage: 'No token provided',
@@ -22,7 +26,9 @@ export default defineEventHandler(async (event) => {
   }
 
   // Buscar al usuario por el token
-  const user = users.find(u => u.token === token);
+  const user = await prisma.user.findFirst({
+    where: { token }, // Usa `findFirst` si `token` no es único
+  });
 
   if (!user) {
     throw createError({
@@ -31,9 +37,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Opcional: Invalidar el token (por ejemplo, establecerlo como null o vacío)
+  await prisma.user.update({
+    where: { id: user.id }, // Utiliza el ID del usuario encontrado
+    data: { token: null }, // O puedes usar "" para vaciar el token
+  });
 
-
-  return {
-    message: 'Successfully logged out',
-  };
+  // Respuesta exitosa
+  event.res.statusCode = 204; // No Content
 });

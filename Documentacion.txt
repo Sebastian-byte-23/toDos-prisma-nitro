@@ -1,0 +1,21 @@
+Inicializar el proyecto:
+
+npm init -y
+
+Instalar dependencias:
+
+npm install typescript ts-node @types/node --save-dev
+npm install prisma @prisma/client
+npm install nitropack
+
+Configurar Prisma:
+
+npx prisma init
+
+Iniciar el servidor de desarrollo:
+
+npx nitropack dev
+
+Abrir Prisma Studio (opcional):
+
+npx prisma studio

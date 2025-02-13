@@ -1,40 +1,38 @@
-import { defineEventHandler, readBody, createError } from 'h3';
-import { v4 as uuidv4 } from 'uuid';
+import { defineEventHandler, readBody } from 'h3';
+import { addToDo, getToDosByUser } from '../../utils/repositories/toDos'; // Asegúrate de que la ruta sea correcta
 
-// Simulación de base de datos en memoria
-const todos: Array<{ id: string, title: string, completed: boolean }> = [];
-
+// listar y crear
 export default defineEventHandler(async (event) => {
-  if (event.req.method === 'POST') {
+  const method = event.req.method;
+
+  if (method === 'POST') {
+    const userId = 1; // Aquí puedes reemplazar con el ID del usuario autenticado
     try {
-      const body = await readBody(event);
-      const { title } = body as { title: string };
-
-      if (!title || typeof title !== 'string') {
-        return createError({ statusCode: 400, message: 'El título no fue enviado correctamente' });
-      }
-
-      const newTodo = {
-        id: uuidv4(),
-        title,
-        completed: false,
-      };
-
-      todos.push(newTodo);
-
-      return newTodo;
-    } catch (error) {
-      console.error('Error al crear la tarea:', error);
-      return createError({ statusCode: 500, message: 'Error al crear la tarea' });
-    }
-  } else if (event.req.method === 'GET') {
-    try {
+      const todos = await getToDosByUser(userId);  // Obtener tareas desde la BD
       return todos;
     } catch (error) {
-      console.error('Error al listar las tareas:', error);
-      return createError({ statusCode: 500, message: 'Error al listar las tareas' });
+      event.res.statusCode = 500;
+      return { error: 'Error al obtener las tareas' };
     }
-  } else {
-    return createError({ statusCode: 405, message: 'Método no permitido' });
-  }
-});
+  } else if (method === 'POST') {
+    const body = await readBody(event);
+    console.log(body); // Verifica el contenido del cuerpo
+
+    if (!body.title) {
+      event.res.statusCode = 400;
+      return { error: 'El título es obligatorio' };
+    }
+
+    const userId = body.userId || 1; // Reemplazar con el ID del usuario autenticado
+    try {
+      const newToDo = await addToDo({
+        userId,
+        title: body.title,
+        completed: body.completed || false, // Asegúrate de que esto sea un booleano
+      });
+      return newToDo; // Devolver el ToDo recién creado
+    } catch (error) {
+      console.error('Error al crear la tarea:', error); // Mensaje de error
+      event.res.statusCode = 500;
+      return { error: 'Error al crear la tarea' };
+    }}})
