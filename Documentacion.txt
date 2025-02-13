@@ -19,3 +19,8 @@ npx nitropack dev
 Abrir Prisma Studio (opcional):
 
 npx prisma studio
+
+Credenciales:
+
+usuario: admin
+clave: certamen123
